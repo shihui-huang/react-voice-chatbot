@@ -1,117 +1,162 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'] })
+import 'regenerator-runtime/runtime'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMicrophone, faQuoteLeft } from '@fortawesome/free-solid-svg-icons'
+import { useEffect, useState } from 'react'
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
+const defaultIntroduction = `Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Right now, my specialty is making you
+laugh with hilarious punchlines. But here's the exciting part: in the future, I'll be able to do so much
+more than that!`
 
 export default function Home() {
+  const API_KEY = process.env.API_KEY
+  const commands = [
+    {
+      command: ['*'],
+      callback: (command: string) => handleSend(command),
+    },
+  ]
+
+  const [speakButtonDisabled, setSpeakButtonDisabled] = useState(false)
+  const { transcript, resetTranscript, listening, finalTranscript } = useSpeechRecognition({ commands })
+  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
+  const [messages, setMessages] = useState([
+    {
+      message: defaultIntroduction,
+      sender: 'ChatGPT',
+    },
+  ])
+
+  useEffect(() => {
+    setSpeechSynthesis(window.speechSynthesis)
+  }, [])
+
+  const speak = (message: string) => {
+    if (!speechSynthesis) {
+      return
+    }
+
+    if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
+      speechSynthesis.speak(
+        new SpeechSynthesisUtterance(
+          'Your browser does not support speech recognition software! Try Chrome desktop, maybe?',
+        ),
+      )
+      return
+    }
+
+    speechSynthesis.speak(new SpeechSynthesisUtterance(message))
+  }
+
+  const systemMessageToSetChatGptBehaviour = {
+    role: 'system',
+    content:
+      'Your name is Bob. An incredibly intelligent and quick-thinking AI, that always replies with an enthusiastic and positive energy.',
+  }
+
+  const handleSend = async (message: string) => {
+    if (!message) {
+      return
+    }
+    const formattedMessage = {
+      message,
+      direction: 'outgoing',
+      sender: 'user',
+    }
+
+    const updatedMessages = [...messages, formattedMessage]
+
+    setMessages(updatedMessages)
+
+    // Initial system message to determine ChatGPT functionality
+    // How it responds, how it talks, etc.
+    await getChatGptAnswer(updatedMessages)
+  }
+
+  async function getChatGptAnswer(messagesWithSender: { message: string; sender: string }[]) {
+    // messages is an array of messages
+    // Format messages for chatGPT API
+    // API is expecting objects in format of { role: "user" or "assistant", "content": "message here"}
+    // So we need to reformat
+
+    let chatGptApiFormattedMessages = messagesWithSender.map((messageObject) => {
+      if (messageObject.sender === 'ChatGPT') {
+        return { role: 'assistant', content: messageObject.message }
+      } else {
+        return { role: 'user', content: messageObject.message }
+      }
+    })
+
+    // Get the request body set up with the model we plan to use
+    // and the messages which we formatted above. We add a system message in the front to'
+    // determine how we want chatGPT to act.
+    const chatGptApiRequestBody = {
+      model: 'gpt-3.5-turbo',
+      messages: [
+        systemMessageToSetChatGptBehaviour, // The system message DEFINES the logic of our chatGPT
+        ...chatGptApiFormattedMessages, // The messages from our chat with ChatGPT
+      ],
+    }
+    console.log(process.env.API_KEY)
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + `${API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(chatGptApiRequestBody),
+    })
+
+    const { choices } = await response.json()
+    setMessages([
+      ...messagesWithSender,
+      {
+        message: choices[0].message.content,
+        sender: 'ChatGPT',
+      },
+    ])
+    speak(choices[0].message.content)
+  }
+
+  const ask = () => {
+    setSpeakButtonDisabled(true)
+    if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
+      setMessages([
+        ...messages,
+        {
+          message: 'Your browser does not support speech recognition software! Try Chrome desktop, maybe?',
+          sender: 'ChatGPT',
+        },
+      ])
+      return
+    }
+    SpeechRecognition.startListening()
+    if (transcript !== '') {
+      resetTranscript()
+    }
+    setSpeakButtonDisabled(false)
+  }
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className='bg-[#45badd]'>
+      <div className='h-screen w-screen lg:flex lg:flex-row lg:items-center lg:justify-center flex-col items-center justify-end lg:p-24 p-10 pt-0'>
+        <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] md:h-[calc(100%-200px)] sm:h-[calc(100%-300px)] w-full bg-no-repeat bg-contain bg-center'></div>
+        <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)]'>
+          <div className='text-xl text-[#433136] font-bold pb-4'>
+            <FontAwesomeIcon
+              icon={faQuoteLeft}
+              style={{ color: 'black', fontSize: '35px', paddingRight: '12px' }}
+            ></FontAwesomeIcon>
+            {messages[messages.length - 1].message}
+          </div>
+          <button
+            className='cursor-pointer outline-none w-[80px] h-[50px] md:text-lg text-white bg-[#ff3482] border-none border-r-5 shadow'
+            onClick={ask}
+            disabled={speakButtonDisabled}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <FontAwesomeIcon icon={faMicrophone} style={{ color: 'white', fontSize: 30 }}></FontAwesomeIcon>
+          </button>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
       </div>
     </main>
   )
