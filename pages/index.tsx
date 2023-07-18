@@ -3,12 +3,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMicrophone, faQuoteLeft } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
+import { METHODS } from '@/constants'
 const defaultIntroduction = `Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Right now, my specialty is making you
 laugh with hilarious punchlines. But here's the exciting part: in the future, I'll be able to do so much
 more than that!`
 
 export default function Home() {
-  const API_KEY = process.env.API_KEY
   const commands = [
     {
       command: ['*'],
@@ -73,49 +73,42 @@ export default function Home() {
   }
 
   async function getChatGptAnswer(messagesWithSender: { message: string; sender: string }[]) {
-    // messages is an array of messages
-    // Format messages for chatGPT API
-    // API is expecting objects in format of { role: "user" or "assistant", "content": "message here"}
-    // So we need to reformat
-
-    let chatGptApiFormattedMessages = messagesWithSender.map((messageObject) => {
-      if (messageObject.sender === 'ChatGPT') {
-        return { role: 'assistant', content: messageObject.message }
-      } else {
-        return { role: 'user', content: messageObject.message }
+    const chatGptApiFormattedMessages = messagesWithSender.map((messageObject) => {
+      return {
+        role: messageObject.sender === 'ChatGPT' ? 'assistant' : 'user',
+        content: messageObject.message,
       }
     })
 
-    // Get the request body set up with the model we plan to use
-    // and the messages which we formatted above. We add a system message in the front to'
-    // determine how we want chatGPT to act.
-    const chatGptApiRequestBody = {
-      model: 'gpt-3.5-turbo',
-      messages: [
-        systemMessageToSetChatGptBehaviour, // The system message DEFINES the logic of our chatGPT
-        ...chatGptApiFormattedMessages, // The messages from our chat with ChatGPT
-      ],
+    const chatGptApiMessages = [
+      systemMessageToSetChatGptBehaviour, // The system message DEFINES the logic of our chatGPT
+      ...chatGptApiFormattedMessages, // The messages from our chat with ChatGPT
+    ]
+
+    try {
+      const response = await fetch(`/api/chat/message`, {
+        method: METHODS.POST,
+        body: JSON.stringify(chatGptApiMessages),
+      })
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      const data = await response.json()
+
+      const { choices } = data
+      setMessages([
+        ...messagesWithSender,
+        {
+          message: choices[0].message.content,
+          sender: 'ChatGPT',
+        },
+      ])
+      speak(choices[0].message.content)
+    } catch (error) {
+      console.error('Error:', error)
     }
-    console.log(process.env.API_KEY)
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + `${API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(chatGptApiRequestBody),
-    })
-
-    const { choices } = await response.json()
-    setMessages([
-      ...messagesWithSender,
-      {
-        message: choices[0].message.content,
-        sender: 'ChatGPT',
-      },
-    ])
-    speak(choices[0].message.content)
   }
 
   const ask = () => {
