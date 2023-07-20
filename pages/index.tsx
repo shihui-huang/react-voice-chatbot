@@ -4,9 +4,7 @@ import { faMicrophone, faQuoteLeft } from '@fortawesome/free-solid-svg-icons'
 import { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { METHODS } from '@/constants'
-const defaultIntroduction = `Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Right now, my specialty is making you
-laugh with hilarious punchlines. But here's the exciting part: in the future, I'll be able to do so much
-more than that!`
+const defaultIntroduction = `Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Let's have a blast talking about anything you like. Give me a call! 📞 Let's chat! `
 
 export default function Home() {
   const commands = [
@@ -16,22 +14,24 @@ export default function Home() {
     },
   ]
 
-  const [speakButtonDisabled, setSpeakButtonDisabled] = useState(false)
-  const { transcript, resetTranscript, listening, finalTranscript } = useSpeechRecognition({ commands })
-  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
-  const [messages, setMessages] = useState([
+  const defaultMessage = [
     {
       message: defaultIntroduction,
       sender: 'ChatGPT',
     },
-  ])
+  ]
+  const [isCalling, setIsCalling] = useState(false)
+  const { transcript, resetTranscript, listening, finalTranscript } = useSpeechRecognition({ commands })
+  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
+  const [isChatbotSpeaking, setIsChatBotSpeaking] = useState(false)
+  const [messages, setMessages] = useState(defaultMessage)
 
   useEffect(() => {
     setSpeechSynthesis(window.speechSynthesis)
   }, [])
 
-  const speak = (message: string) => {
-    if (!speechSynthesis) {
+  const chatBotSpeak = (message: string) => {
+    if (isChatbotSpeaking || !speechSynthesis) {
       return
     }
 
@@ -43,14 +43,25 @@ export default function Home() {
       )
       return
     }
-
-    speechSynthesis.speak(new SpeechSynthesisUtterance(message))
+    const utterance = new SpeechSynthesisUtterance(message)
+    utterance.onstart = handleChatbotSpeechStart
+    utterance.onend = handleChatbotSpeechEnd
+    speechSynthesis.speak(utterance)
   }
 
+  const handleChatbotSpeechStart = () => {
+    setIsChatBotSpeaking(true)
+    SpeechRecognition.stopListening()
+  }
+
+  const handleChatbotSpeechEnd = () => {
+    setIsChatBotSpeaking(false)
+    SpeechRecognition.startListening()
+  }
   const systemMessageToSetChatGptBehaviour = {
     role: 'system',
     content:
-      'Your name is Bob. An incredibly intelligent and quick-thinking AI, that always replies with an enthusiastic and positive energy.',
+      'My name is Bob. I am good at finding chat topics and always reply in a friendly way, and keep my answer as short as possible, I do not like sending emoji',
   }
 
   const handleSend = async (message: string) => {
@@ -67,8 +78,6 @@ export default function Home() {
 
     setMessages(updatedMessages)
 
-    // Initial system message to determine ChatGPT functionality
-    // How it responds, how it talks, etc.
     await getChatGptAnswer(updatedMessages)
   }
 
@@ -105,14 +114,21 @@ export default function Home() {
           sender: 'ChatGPT',
         },
       ])
-      speak(choices[0].message.content)
+      chatBotSpeak(choices[0].message.content)
     } catch (error) {
       console.error('Error:', error)
     }
   }
 
-  const ask = () => {
-    setSpeakButtonDisabled(true)
+  const userSpeak = () => {
+    SpeechRecognition.startListening()
+    if (transcript !== '') {
+      resetTranscript()
+    }
+  }
+
+  const userCall = () => {
+    setIsCalling(true)
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
       setMessages([
         ...messages,
@@ -121,15 +137,32 @@ export default function Home() {
           sender: 'ChatGPT',
         },
       ])
+      setIsCalling(false)
       return
     }
-    SpeechRecognition.startListening()
-    if (transcript !== '') {
-      resetTranscript()
+
+    const firstMessage = 'Hey there, how was it going ?'
+    const formattedMessage = {
+      message: firstMessage,
+      sender: 'assistant',
     }
-    setSpeakButtonDisabled(false)
+
+    const updatedMessages = [...messages, formattedMessage]
+
+    setMessages(updatedMessages)
+    chatBotSpeak(firstMessage)
+    userSpeak()
   }
 
+  const resetConversation = () => {
+    setMessages(defaultMessage)
+  }
+
+  const endCall = () => {
+    SpeechRecognition.stopListening()
+    resetConversation()
+    setIsCalling(false)
+  }
   return (
     <main className='bg-[#45badd]'>
       <div className='h-screen w-screen lg:flex lg:flex-row lg:items-center lg:justify-center flex-col items-center justify-end lg:p-24 p-10 pt-0'>
@@ -142,13 +175,21 @@ export default function Home() {
             ></FontAwesomeIcon>
             {messages[messages.length - 1].message}
           </div>
-          <button
-            className='cursor-pointer outline-none w-[80px] h-[50px] md:text-lg text-white bg-[#ff3482] border-none border-r-5 shadow'
-            onClick={ask}
-            disabled={speakButtonDisabled}
-          >
-            <FontAwesomeIcon icon={faMicrophone} style={{ color: 'white', fontSize: 30 }}></FontAwesomeIcon>
-          </button>
+          {!isCalling ? (
+            <button
+              className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
+              onClick={userCall}
+            >
+              Call Bob 📞
+            </button>
+          ) : (
+            <button
+              className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
+              onClick={endCall}
+            >
+              Hang up
+            </button>
+          )}
         </div>
       </div>
     </main>
