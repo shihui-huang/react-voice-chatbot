@@ -208,7 +208,7 @@ export default function Home() {
 
   return (
     <main className='bg-[#45badd]'>
-      <div className='h-screen w-screen lg:flex lg:flex-row lg:items-center lg:justify-center flex-col items-center justify-end lg:p-24 p-10 pt-0'>
+      <div className='h-screen w-screen lg:flex lg:flex-row lg:items-center lg:justify-center flex-col items-center justify-end lg:p-24 p-10 pt-0 overflow-auto'>
         <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] md:h-[calc(100%-200px)] xs:h-[calc(100%-300px)] w-full bg-no-repeat bg-contain bg-center'></div>
         <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)]'>
           <div className='text-xl text-[#433136] font-bold pb-4'>
