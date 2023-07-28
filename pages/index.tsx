@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMicrophone, faQuoteLeft } from '@fortawesome/free-solid-svg-icons'
-import { useEffect, useState } from 'react'
+import { faMicrophone, faMicrophoneSlash, faQuoteLeft, faSquare } from '@fortawesome/free-solid-svg-icons'
+import React, { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { METHODS } from '@/constants'
 const defaultIntroduction = `Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Let's have a blast talking about anything you like. Give me a call! 📞 Let's chat! `
@@ -55,13 +55,15 @@ export default function Home() {
   }
 
   const handleChatbotSpeechEnd = () => {
+    if (isCalling) {
+      SpeechRecognition.startListening()
+    }
     setIsChatBotSpeaking(false)
-    SpeechRecognition.startListening()
   }
   const systemMessageToSetChatGptBehaviour = {
     role: 'system',
     content:
-      'My name is Bob. I am good at finding chat topics and always reply in a friendly way, and keep my answer as short as possible, I do not like sending emoji',
+      'My name is Bob. I am good at finding chat topics and always reply in a friendly and sweet way, and keep my answer as short as possible, I do not like sending emoji',
   }
 
   const handleSend = async (message: string) => {
@@ -126,6 +128,9 @@ export default function Home() {
       resetTranscript()
     }
   }
+  const userStopSpeaking = () => {
+    SpeechRecognition.stopListening()
+  }
 
   const userCall = () => {
     setIsCalling(true)
@@ -151,7 +156,7 @@ export default function Home() {
 
     setMessages(updatedMessages)
     chatBotSpeak(firstMessage)
-    userSpeak()
+    setTimeout(() => userSpeak(), 2000)
   }
 
   const resetConversation = () => {
@@ -162,11 +167,49 @@ export default function Home() {
     SpeechRecognition.stopListening()
     resetConversation()
     setIsCalling(false)
+    if (isChatbotSpeaking) {
+      speechSynthesis?.cancel()
+    }
+    setIsChatBotSpeaking(false)
   }
+
+  const callingButtons = React.useMemo(() => {
+    return (
+      <React.Fragment>
+        {listening ? (
+          <button className='pb-10 pt-5' onClick={userStopSpeaking}>
+            <span className='relative flex h-[60px] w-[60px]'>
+              <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff5797] '></span>
+              <span className='relative inline-flex rounded-full h-[60px] w-[60px] bg-[#fc4189] opacity-15 justify-center items-center'>
+                <FontAwesomeIcon icon={faSquare} style={{ color: 'white', fontSize: '25px' }}></FontAwesomeIcon>
+              </span>
+            </span>
+          </button>
+        ) : (
+          <button className='pb-10 pt-5' onClick={userSpeak}>
+            <span className='relative flex h-[60px] w-[60px]'>
+              <span className='absolute inline-flex h-full w-full rounded-full bg-gray-300'></span>
+              <span className='relative inline-flex rounded-full h-[60px] w-[60px] bg-[#fc4189] opacity-15 justify-center items-center'>
+                <FontAwesomeIcon icon={faMicrophone} style={{ color: 'white', fontSize: '25px' }}></FontAwesomeIcon>
+              </span>
+            </span>
+          </button>
+        )}
+
+        <button
+          className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
+          onClick={endCall}
+        >
+          Hang up
+        </button>
+      </React.Fragment>
+    )
+  }, [listening])
+
   return (
     <main className='bg-[#45badd]'>
       <div className='h-screen w-screen lg:flex lg:flex-row lg:items-center lg:justify-center flex-col items-center justify-end lg:p-24 p-10 pt-0'>
-        <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] md:h-[calc(100%-200px)] sm:h-[calc(100%-300px)] w-full bg-no-repeat bg-contain bg-center'></div>
+        <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] md:h-[calc(100%-200px)] xs:h-[calc(100%-300px)] w-full bg-no-repeat bg-contain bg-center'></div>
         <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)]'>
           <div className='text-xl text-[#433136] font-bold pb-4'>
             <FontAwesomeIcon
@@ -183,12 +226,7 @@ export default function Home() {
               Call Bob 📞
             </button>
           ) : (
-            <button
-              className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
-              onClick={endCall}
-            >
-              Hang up
-            </button>
+            callingButtons
           )}
         </div>
       </div>
