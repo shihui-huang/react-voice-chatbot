@@ -4,7 +4,7 @@ import { faMicrophone, faQuoteLeft, faSquare } from '@fortawesome/free-solid-svg
 import React, { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { METHODS } from '@/constants'
-const defaultIntroduction = `Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Let's have a blast talking about anything you like. Give me a call! 📞 Let's chat! `
+import { useTranslation } from 'next-i18next'
 
 export default function CallBob() {
   const commands = [
@@ -13,18 +13,27 @@ export default function CallBob() {
       callback: (command: string) => handleSend(command),
     },
   ]
-
+  
+  const [isCalling, setIsCalling] = useState(false)
+  const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
+  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
+  const [isChatbotSpeaking, setIsChatBotSpeaking] = useState(false)
+  const { t, i18n } = useTranslation()
+  const defaultIntroduction = t('bob.introduction') 
   const defaultMessage = [
     {
       message: defaultIntroduction,
       sender: 'ChatGPT',
     },
   ]
-  const [isCalling, setIsCalling] = useState(false)
-  const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
-  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
-  const [isChatbotSpeaking, setIsChatBotSpeaking] = useState(false)
   const [messages, setMessages] = useState(defaultMessage)
+  
+  
+  const handleLanguageChange = (newLocale: string) => {
+    console.log(t, i18n)
+    i18n.changeLanguage(newLocale);
+  }
+
 
   useEffect(() => {
     setSpeechSynthesis(window.speechSynthesis)
@@ -218,6 +227,7 @@ export default function CallBob() {
             ></FontAwesomeIcon>
             {messages[messages.length - 1].message}
           </div>
+          <button className="w-[120px] h-[50px]" onClick={()=>handleLanguageChange('zn')}>change</button>
           {!isCalling ? (
             <button
               className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
