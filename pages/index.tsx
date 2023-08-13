@@ -1,17 +1,24 @@
 import CallBob from './CallBob'
-import {GetStaticProps} from "next";
-import {Props} from "next/script";
-import {getServerTranslations} from "@/lib/i18n/getServerTranslations";
+import { GetStaticProps } from 'next'
+import { Props } from 'next/script'
+import { getServerTranslations } from '@/lib/i18n/getServerTranslations'
+import { LanguageProvider } from './LanguageContext'
 
+// @ts-ignore
 export const getStaticProps: GetStaticProps<Props> = async (context) => {
-  const { locale } = context;
+  const { locale } = context
   return {
     props: {
+      // @ts-ignore
       ...(await getServerTranslations(locale, ['common'])),
     },
-  };
-};
+  }
+}
 
 export default function Home() {
-  return <CallBob />
+  return (
+    <LanguageProvider>
+      <CallBob />
+    </LanguageProvider>
+  )
 }

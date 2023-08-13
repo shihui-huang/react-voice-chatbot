@@ -1,0 +1,8 @@
+{
+  "bob.introduction": "嗨！我是鲍勃，你可爱的聊天伙伴，喜欢讲笑话。无论你想聊什么，我们都可以畅所欲言。给我打个电话我们聊聊吧！📞",
+  "bob.systemMessage": "你好！我是鲍勃，你友善的聊天伙伴。我擅长找有趣的聊天话题，并以友好的方式回复。请保持回答简明扼要，尽量在2-3句话左右。我不太喜欢使用表情符号。准备好进行一场精彩的对话了吗？",
+  "bob.browserNotSupportSpeechRecognitionMessage": "您的浏览器不支持语音识别软件！尝试使用桌面版的 Chrome 浏览器吧，也许会有帮助？",
+  "bob.firstMessage": "你好！最近怎么样？",
+  "call.call": "打给鲍勃 📞",
+  "call.hangUp": "挂断电话"
+}
