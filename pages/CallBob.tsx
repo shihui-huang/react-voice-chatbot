@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { METHODS } from '@/constants'
 import { useTranslation } from 'next-i18next'
+import { useRouter } from 'next/router'
+import { useLanguage } from './LanguageContext'
 
 export default function CallBob() {
   const commands = [
@@ -13,13 +15,15 @@ export default function CallBob() {
       callback: (command: string) => handleSend(command),
     },
   ]
-  
+  const router = useRouter()
+
   const [isCalling, setIsCalling] = useState(false)
   const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
   const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
   const [isChatbotSpeaking, setIsChatBotSpeaking] = useState(false)
   const { t, i18n } = useTranslation()
-  const defaultIntroduction = t('bob.introduction') 
+  const { selectedLanguage, changeLanguage } = useLanguage()
+  const defaultIntroduction = t('bob.introduction')
   const defaultMessage = [
     {
       message: defaultIntroduction,
@@ -27,13 +31,17 @@ export default function CallBob() {
     },
   ]
   const [messages, setMessages] = useState(defaultMessage)
-  
-  
-  const handleLanguageChange = (newLocale: string) => {
-    console.log(t, i18n)
-    i18n.changeLanguage(newLocale);
-  }
 
+  // if selectedLanguage changes, reset call
+  useEffect(() => {
+    endCall()
+    console.log(systemMessageToSetChatGptBehaviour)
+  }, [defaultIntroduction])
+
+  const handleLanguageChange = (newLocale: string) => {
+    console.log(i18n.language, newLocale)
+    changeLanguage(newLocale)
+  }
 
   useEffect(() => {
     setSpeechSynthesis(window.speechSynthesis)
@@ -45,14 +53,11 @@ export default function CallBob() {
     }
 
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
-      speechSynthesis.speak(
-        new SpeechSynthesisUtterance(
-          'Your browser does not support speech recognition software! Try Chrome desktop, maybe?',
-        ),
-      )
+      speechSynthesis.speak(new SpeechSynthesisUtterance(t('bob.browserNotSupportSpeechRecognitionMessage')))
       return
     }
     const utterance = new SpeechSynthesisUtterance(message)
+    utterance.lang = selectedLanguage
     utterance.onstart = handleChatbotSpeechStart
     utterance.onend = handleChatbotSpeechEnd
     speechSynthesis.speak(utterance)
@@ -65,14 +70,13 @@ export default function CallBob() {
 
   const handleChatbotSpeechEnd = () => {
     if (isCalling) {
-      SpeechRecognition.startListening()
+      SpeechRecognition.startListening({ language: selectedLanguage })
     }
     setIsChatBotSpeaking(false)
   }
   const systemMessageToSetChatGptBehaviour = {
     role: 'system',
-    content:
-      'My name is Bob. I am good at finding chat topics and always reply in a friendly and sweet way, and keep my answer as short as possible, I do not like sending emoji',
+    content: t('bob.systemMessage'),
   }
 
   const handleSend = async (message: string) => {
@@ -132,7 +136,8 @@ export default function CallBob() {
   }
 
   const userSpeak = () => {
-    SpeechRecognition.startListening()
+    SpeechRecognition.startListening({ language: selectedLanguage })
+
     if (transcript !== '') {
       resetTranscript()
     }
@@ -147,7 +152,7 @@ export default function CallBob() {
       setMessages([
         ...messages,
         {
-          message: 'Your browser does not support speech recognition software! Try Chrome desktop, maybe?',
+          message: t('bob.browserNotSupportSpeechRecognitionMessage'),
           sender: 'ChatGPT',
         },
       ])
@@ -155,7 +160,7 @@ export default function CallBob() {
       return
     }
 
-    const firstMessage = 'Hey there, how was it going ?'
+    const firstMessage = t('bob.firstMessage')
     const formattedMessage = {
       message: firstMessage,
       sender: 'assistant',
@@ -209,7 +214,7 @@ export default function CallBob() {
           className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
           onClick={endCall}
         >
-          Hang up
+          {t('call.hangUp')}
         </button>
       </React.Fragment>
     )
@@ -227,13 +232,15 @@ export default function CallBob() {
             ></FontAwesomeIcon>
             {messages[messages.length - 1].message}
           </div>
-          <button className="w-[120px] h-[50px]" onClick={()=>handleLanguageChange('zn')}>change</button>
+          <button className='w-[120px] h-[50px]' onClick={() => handleLanguageChange('zh-CN')}>
+            change
+          </button>
           {!isCalling ? (
             <button
               className='cursor-pointer outline-none w-[120px] h-[50px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
               onClick={userCall}
             >
-              Call Bob 📞
+              {t('call.call')}
             </button>
           ) : (
             callingButtons

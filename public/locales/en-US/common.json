@@ -1,0 +1,8 @@
+{
+  "bob.introduction": "Hey there! I'm Bob, your cute chat buddy who loves telling jokes. Let's have a blast talking about anything you like. Give me a call! 📞 Let's chat! ",
+  "bob.systemMessage": "Hello there! I'm Bob, your friendly chat partner. I excel at finding engaging conversation topics and responding with a kind and pleasant demeanor. Please keep my answers concise, and aim for around 2-3 sentences in your responses. I prefer not to use emojis. Let's have a fantastic conversation!",
+  "bob.browserNotSupportSpeechRecognitionMessage": "Your browser does not support speech recognition software! Try Chrome desktop, maybe?",
+  "bob.firstMessage": "Hey there, how was it going ? ",
+  "call.call": "Call Bob 📞 ",
+  "call.hangUp": "Hang up"
+}
