@@ -1,8 +1,7 @@
-import CallBob from './CallBob'
 import { GetStaticProps } from 'next'
 import { Props } from 'next/script'
 import { getServerTranslations } from '@/lib/i18n/getServerTranslations'
-import { LanguageProvider } from './LanguageContext'
+import MainLayout from '../components/MainLayout'
 
 // @ts-ignore
 export const getStaticProps: GetStaticProps<Props> = async (context) => {
@@ -16,9 +15,5 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 }
 
 export default function Home() {
-  return (
-    <LanguageProvider>
-      <CallBob />
-    </LanguageProvider>
-  )
+  return <MainLayout />
 }

@@ -12,7 +12,7 @@ type LanguageProviderProps = {
   children: React.ReactNode
 }
 
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en-US') // Default language
 
   useEffect(() => {
@@ -35,3 +35,5 @@ export const useLanguage = () => {
   }
   return context
 }
+
+export default LanguageProvider
