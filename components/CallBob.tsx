@@ -213,9 +213,9 @@ export default function CallBob() {
   }, [listening])
 
   return (
-    <div className='lg:flex lg:flex-row lg:items-center lg:justify-center flex-col items-center justify-end overflow-auto'>
-      <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] md:h-[calc(100%-200px)] xs:h-[calc(100%-300px)] w-full bg-no-repeat bg-contain bg-center'></div>
-      <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)]'>
+    <div className='flex lg:flex-row lg:items-center lg:justify-center xs:h-full flex-col items-center justify-end overflow-auto'>
+      <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] xs:h-0 w-full bg-no-repeat bg-contain bg-center'></div>
+      <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)] xs:h-full'>
         <div className='text-xl text-[#433136] font-bold pb-4'>
           <FontAwesomeIcon
             icon={faQuoteLeft}
@@ -223,16 +223,18 @@ export default function CallBob() {
           ></FontAwesomeIcon>
           {messages[messages.length - 1].message}
         </div>
-        {!isCalling ? (
-          <button
-            className='cursor-pointer outline-none w-[145px] h-[60px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
-            onClick={userCall}
-          >
-            {t('call.call')}
-          </button>
-        ) : (
-          callingButtons
-        )}
+        <div className='flex justify-center flex-col items-center absolute bottom-7 lg:relative lg:bottom-0'>
+          {!isCalling ? (
+            <button
+              className='cursor-pointer outline-none w-[145px] h-[60px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
+              onClick={userCall}
+            >
+              {t('call.call')}
+            </button>
+          ) : (
+            callingButtons
+          )}
+        </div>
       </div>
     </div>
   )
