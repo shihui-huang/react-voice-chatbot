@@ -4,5 +4,14 @@
   "bob.browserNotSupportSpeechRecognitionMessage": "您的浏览器不支持语音识别软件！尝试使用桌面版的 Chrome 浏览器吧，也许会有帮助？",
   "bob.firstMessage": "你好！最近怎么样？",
   "call.call": "打给鲍勃 📞",
-  "call.hangUp": "挂断电话"
+  "call.hangUp": "挂断电话",
+  "conversation.idea": "聊天话题建议",
+  "conversation.fitnessCoach.title": "健身教练",
+  "conversation.fitnessCoach.prompt": "我希望你能充当我的私人健身教练。你可以根据我的要求：为我制定锻炼计划、协助练习、解释健身的重要性，回答健身方面的问题。你还可以询问我的健身目标和我想要锻炼的部位。",
+  "conversation.jobInterview.title": "求职面试",
+  "conversation.jobInterview.prompt": "我会告诉你我正在寻找的职位以及我拥有的工作经验，让我们进行一个角色扮演，模拟我在即将到来的求职面试中展示我的技能。",
+  "conversation.languagePractice.title": "语言练习",
+  "conversation.languagePractice.prompt": "扮演一位语言会话导师。给我提供一个{{language}}友好聊天的话题，帮助我练习{{language}}。",
+  "conversation.knowledgeQuiz.title": "知识问答",
+  "conversation.knowledgeQuiz.prompt": "扮演一个学习导师。你能帮我通过提问来帮助我学习吗？先问我一个话题，然后开始提问。"
 }

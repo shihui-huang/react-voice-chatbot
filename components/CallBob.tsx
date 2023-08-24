@@ -5,7 +5,10 @@ import React, { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { METHODS } from '@/constants'
 import { useTranslation } from 'next-i18next'
-import { useLanguage } from './LanguageContext'
+import { languageOptions, useLanguage } from './LanguageContext'
+
+let isUserCalling = false
+let isChatbotSpeaking = false
 
 export default function CallBob() {
   const commands = [
@@ -15,10 +18,9 @@ export default function CallBob() {
     },
   ]
 
-  const [isCalling, setIsCalling] = useState(false)
+  const [isCalling, setIsCalling] = useState(isUserCalling)
   const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
   const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
-  const [isChatbotSpeaking, setIsChatBotSpeaking] = useState(false)
   const { t } = useTranslation()
   const { selectedLanguage } = useLanguage()
   const defaultIntroduction = t('bob.introduction')
@@ -30,6 +32,29 @@ export default function CallBob() {
   ]
   const [messages, setMessages] = useState(defaultMessage)
 
+  const converSationIdeas: { key: string; title: string; prompt: string }[] = [
+    {
+      key: 'conversation.fitnessCoach',
+      title: t('conversation.fitnessCoach.title'),
+      prompt: t('conversation.fitnessCoach.prompt'),
+    },
+    {
+      key: 'conversation.jobInterview',
+      title: t('conversation.jobInterview.title'),
+      prompt: t('conversation.jobInterview.prompt'),
+    },
+    {
+      key: 'conversation.languagePractice',
+      title: t('conversation.languagePractice.title'),
+      prompt: t('conversation.languagePractice.prompt', { language: languageOptions[selectedLanguage] }),
+    },
+    {
+      key: 'conversation.knowledgeQuiz',
+      title: t('conversation.knowledgeQuiz.title'),
+      prompt: t('conversation.knowledgeQuiz.prompt'),
+    },
+  ]
+
   // if selectedLanguage changes, reset call
   useEffect(() => {
     endCall()
@@ -40,7 +65,7 @@ export default function CallBob() {
   }, [])
 
   const chatBotSpeak = (message: string) => {
-    if (isChatbotSpeaking || !speechSynthesis) {
+    if (isChatbotSpeaking || !speechSynthesis || !isUserCalling) {
       return
     }
 
@@ -56,15 +81,15 @@ export default function CallBob() {
   }
 
   const handleChatbotSpeechStart = () => {
-    setIsChatBotSpeaking(true)
+    isChatbotSpeaking = true
     SpeechRecognition.stopListening()
   }
 
   const handleChatbotSpeechEnd = () => {
-    if (isCalling) {
+    if (isUserCalling) {
       SpeechRecognition.startListening({ language: selectedLanguage })
     }
-    setIsChatBotSpeaking(false)
+    isChatbotSpeaking = false
   }
   const systemMessageToSetChatGptBehaviour = {
     role: 'system',
@@ -85,6 +110,15 @@ export default function CallBob() {
 
     setMessages(updatedMessages)
 
+    // Call from conversation ideas
+    if (!isUserCalling) {
+      isUserCalling = true
+      setIsCalling(isUserCalling)
+    }
+    if (isChatbotSpeaking) {
+      speechSynthesis?.cancel()
+      isChatbotSpeaking = false
+    }
     await getChatGptAnswer(updatedMessages)
   }
 
@@ -139,7 +173,9 @@ export default function CallBob() {
   }
 
   const userCall = () => {
-    setIsCalling(true)
+    isUserCalling = true
+    setIsCalling(isUserCalling)
+
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
       setMessages([
         ...messages,
@@ -148,7 +184,8 @@ export default function CallBob() {
           sender: 'ChatGPT',
         },
       ])
-      setIsCalling(false)
+      isUserCalling = false
+      setIsCalling(isUserCalling)
       return
     }
 
@@ -162,7 +199,6 @@ export default function CallBob() {
 
     setMessages(updatedMessages)
     chatBotSpeak(firstMessage)
-    setTimeout(() => userSpeak(), 2000)
   }
 
   const resetConversation = () => {
@@ -172,11 +208,13 @@ export default function CallBob() {
   const endCall = () => {
     SpeechRecognition.stopListening()
     resetConversation()
-    setIsCalling(false)
+    isUserCalling = false
+    setIsCalling(isUserCalling)
     if (isChatbotSpeaking) {
       speechSynthesis?.cancel()
+      isChatbotSpeaking = false
     }
-    setIsChatBotSpeaking(false)
+    SpeechRecognition.abortListening()
   }
 
   const callingButtons = React.useMemo(() => {
@@ -215,7 +253,7 @@ export default function CallBob() {
   return (
     <div className='flex lg:flex-row lg:items-center lg:justify-center xs:h-full flex-col items-center justify-end overflow-auto'>
       <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] xs:h-0 w-full bg-no-repeat bg-contain bg-center'></div>
-      <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)] xs:h-full'>
+      <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)] w-full xs:h-full'>
         <div className='text-xl text-[#433136] font-bold pb-4'>
           <FontAwesomeIcon
             icon={faQuoteLeft}
@@ -234,6 +272,17 @@ export default function CallBob() {
           ) : (
             callingButtons
           )}
+        </div>
+        <div className='flex mt-10 w-full overflow-x-auto'>
+          {converSationIdeas.map((idea) => (
+            <button
+              className='bg-[#fdcfe1] border-2 border-[#e64683cf] mr-3 px-3 py-1 last:mr-0 text-black rounded'
+              key={idea.key}
+              onClick={() => handleSend(idea.prompt)}
+            >
+              {idea.title}
+            </button>
+          ))}
         </div>
       </div>
     </div>

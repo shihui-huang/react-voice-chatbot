@@ -4,5 +4,14 @@
   "bob.browserNotSupportSpeechRecognitionMessage": "Your browser does not support speech recognition software! Try Chrome desktop, maybe?",
   "bob.firstMessage": "Hey there, how was it going ? ",
   "call.call": "Call Bob 📞 ",
-  "call.hangUp": "Hang up"
+  "call.hangUp": "Hang up",
+  "conversation.idea": "Conversation ideas",
+  "conversation.fitnessCoach.title": "Fitness Coach",
+  "conversation.fitnessCoach.prompt": "I want you to act as a personal fitness coach. Things you can do on my request: create a workout plan for me, help on exercises, say why fitness is important, answer fitness questions. You can ask my fitness goal and what im looking to build.",
+  "conversation.jobInterview.title": "Job Interview",
+  "conversation.jobInterview.prompt": "I'll tell you the job position I'm searching for, and the working experience I have, let's do a job interviewe role-play to my skills for an upcoming job interview",
+  "conversation.languagePractice.title": "Language Practice",
+  "conversation.languagePractice.prompt": "Act as an language conversation tutor. You can come up with a topic and ask me questions for a friendly chat in {{language}} to help practice my {{language}}.",
+  "conversation.knowledgeQuiz.title": "Knowledge Quiz",
+  "conversation.knowledgeQuiz.prompt": "Act as a learning tutor. You can come up with a topic by quizzing me on it."
 }

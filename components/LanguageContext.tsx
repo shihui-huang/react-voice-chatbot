@@ -12,6 +12,12 @@ type LanguageProviderProps = {
   children: React.ReactNode
 }
 
+export const languageOptions: Record<string, string> = {
+  'en-US': 'English',
+  'fr-FR': 'Français',
+  'zh-CN': '中文',
+}
+
 const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en-US') // Default language
 

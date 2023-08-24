@@ -9,7 +9,7 @@ function LanguageDropdown() {
     changeLanguage(key)
   }
 
-  const items: MenuProps['items'] = [
+  const languageOptions: MenuProps['items'] = [
     {
       label: '🇺🇸 English',
       key: 'en-US',
@@ -30,9 +30,9 @@ function LanguageDropdown() {
     },
   ]
   //@ts-ignore
-  const selectedLabel = items.find((item) => item?.key === selectedLanguage)?.label
+  const selectedLabel = languageOptions.find((item) => item?.key === selectedLanguage)?.label
   return (
-    <Dropdown menu={{ items, onClick }} className='hover:text-black h-12'>
+    <Dropdown menu={{ items: languageOptions, onClick }} className='hover:text-black h-12'>
       <a onClick={(e) => e.preventDefault()}>
         <Space>
           {selectedLabel}
