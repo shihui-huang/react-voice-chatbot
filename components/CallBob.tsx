@@ -19,16 +19,12 @@ export default function CallBob() {
       callback: (command: string) => handleSend(command),
     },
   ]
-  let userSpeechSynthesis: SpeechSynthesis | undefined
-  let userLocalStorage: Storage | undefined
-  useEffect(() => {
-    userSpeechSynthesis = window.speechSynthesis
-    userLocalStorage = localStorage
-  }, [])
 
   const [isCalling, setIsCalling] = useState(isUserCalling)
   const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
   const { t } = useTranslation()
+  const [userSpeechSynthesis, setUserSpeechSynthesis] = useState<SpeechSynthesis>()
+  const [userLocalStorage, setUserLocalStorage] = useState<Storage>()
   const { selectedLanguage } = useLanguage()
   const defaultIntroduction = t('bob.introduction')
   const defaultMessage = [
@@ -38,6 +34,10 @@ export default function CallBob() {
     },
   ]
   const [messages, setMessages] = useState(defaultMessage)
+  useEffect(() => {
+    setUserSpeechSynthesis(window.speechSynthesis)
+    setUserLocalStorage(localStorage)
+  }, [])
 
   // if selectedLanguage changes, reset call
   useEffect(() => {
@@ -181,7 +181,6 @@ export default function CallBob() {
     const updatedMessages = [...messages, formattedMessage]
 
     setMessages(updatedMessages)
-    console.log('user has called')
     chatBotSpeak(firstMessage)
   }
 
