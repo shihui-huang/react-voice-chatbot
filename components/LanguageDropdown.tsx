@@ -32,7 +32,7 @@ function LanguageDropdown() {
   //@ts-ignore
   const selectedLabel = languageOptions.find((item) => item?.key === selectedLanguage)?.label
   return (
-    <Dropdown menu={{ items: languageOptions, onClick }} className='hover:text-black h-12'>
+    <Dropdown menu={{ items: languageOptions, onClick }} className='hover:text-black'>
       <a onClick={(e) => e.preventDefault()}>
         <Space>
           {selectedLabel}

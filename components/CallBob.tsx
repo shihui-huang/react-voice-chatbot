@@ -1,11 +1,13 @@
 import 'regenerator-runtime/runtime'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMicrophone, faQuoteLeft, faSquare } from '@fortawesome/free-solid-svg-icons'
+
 import React, { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { METHODS } from '@/constants'
 import { useTranslation } from 'next-i18next'
-import { languageOptions, useLanguage } from './LanguageContext'
+import { useLanguage } from './LanguageContext'
+import ConversionIdea from './ConversionIdea'
+import MessageBox from './MessageBox'
+import TalkButton from './TalkButton'
 
 let isUserCalling = false
 let isChatbotSpeaking = false
@@ -17,10 +19,15 @@ export default function CallBob() {
       callback: (command: string) => handleSend(command),
     },
   ]
+  let userSpeechSynthesis: SpeechSynthesis | undefined
+  let userLocalStorage: Storage | undefined
+  useEffect(() => {
+    userSpeechSynthesis = window.speechSynthesis
+    userLocalStorage = localStorage
+  }, [])
 
   const [isCalling, setIsCalling] = useState(isUserCalling)
   const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
-  const [speechSynthesis, setSpeechSynthesis] = useState<SpeechSynthesis>()
   const { t } = useTranslation()
   const { selectedLanguage } = useLanguage()
   const defaultIntroduction = t('bob.introduction')
@@ -32,52 +39,26 @@ export default function CallBob() {
   ]
   const [messages, setMessages] = useState(defaultMessage)
 
-  const converSationIdeas: { key: string; title: string; prompt: string }[] = [
-    {
-      key: 'conversation.fitnessCoach',
-      title: t('conversation.fitnessCoach.title'),
-      prompt: t('conversation.fitnessCoach.prompt'),
-    },
-    {
-      key: 'conversation.jobInterview',
-      title: t('conversation.jobInterview.title'),
-      prompt: t('conversation.jobInterview.prompt'),
-    },
-    {
-      key: 'conversation.languagePractice',
-      title: t('conversation.languagePractice.title'),
-      prompt: t('conversation.languagePractice.prompt', { language: languageOptions[selectedLanguage] }),
-    },
-    {
-      key: 'conversation.knowledgeQuiz',
-      title: t('conversation.knowledgeQuiz.title'),
-      prompt: t('conversation.knowledgeQuiz.prompt'),
-    },
-  ]
-
   // if selectedLanguage changes, reset call
   useEffect(() => {
     endCall()
   }, [defaultIntroduction])
 
-  useEffect(() => {
-    setSpeechSynthesis(window.speechSynthesis)
-  }, [])
-
   const chatBotSpeak = (message: string) => {
-    if (isChatbotSpeaking || !speechSynthesis || !isUserCalling) {
+    if (isChatbotSpeaking || !userSpeechSynthesis || !isUserCalling) {
       return
     }
 
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
-      speechSynthesis.speak(new SpeechSynthesisUtterance(t('bob.browserNotSupportSpeechRecognitionMessage')))
+      userSpeechSynthesis.speak(new SpeechSynthesisUtterance(t('bob.browserNotSupportSpeechRecognitionMessage')))
       return
     }
     const utterance = new SpeechSynthesisUtterance(message)
     utterance.lang = selectedLanguage
     utterance.onstart = handleChatbotSpeechStart
     utterance.onend = handleChatbotSpeechEnd
-    speechSynthesis.speak(utterance)
+    userSpeechSynthesis.speak(utterance)
+    console.log('chatbot speak')
   }
 
   const handleChatbotSpeechStart = () => {
@@ -86,7 +67,9 @@ export default function CallBob() {
   }
 
   const handleChatbotSpeechEnd = () => {
+    console.log('end speak')
     if (isUserCalling) {
+      console.log('start lisening')
       SpeechRecognition.startListening({ language: selectedLanguage })
     }
     isChatbotSpeaking = false
@@ -116,7 +99,7 @@ export default function CallBob() {
       setIsCalling(isUserCalling)
     }
     if (isChatbotSpeaking) {
-      speechSynthesis?.cancel()
+      userSpeechSynthesis?.cancel()
       isChatbotSpeaking = false
     }
     await getChatGptAnswer(updatedMessages)
@@ -198,6 +181,7 @@ export default function CallBob() {
     const updatedMessages = [...messages, formattedMessage]
 
     setMessages(updatedMessages)
+    console.log('user has called')
     chatBotSpeak(firstMessage)
   }
 
@@ -211,79 +195,28 @@ export default function CallBob() {
     isUserCalling = false
     setIsCalling(isUserCalling)
     if (isChatbotSpeaking) {
-      speechSynthesis?.cancel()
+      userSpeechSynthesis?.cancel()
       isChatbotSpeaking = false
     }
     SpeechRecognition.abortListening()
+    userLocalStorage?.setItem('callHistory', JSON.stringify({ messages, date: new Date() }))
+    console.log(messages)
   }
-
-  const callingButtons = React.useMemo(() => {
-    return (
-      <React.Fragment>
-        {listening ? (
-          <button className='pb-10 pt-5' onClick={userStopSpeaking}>
-            <span className='relative flex h-[60px] w-[60px]'>
-              <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff5797] '></span>
-              <span className='relative inline-flex rounded-full h-[60px] w-[60px] bg-[#fc4189] opacity-15 justify-center items-center'>
-                <FontAwesomeIcon icon={faSquare} style={{ color: 'white', fontSize: '25px' }}></FontAwesomeIcon>
-              </span>
-            </span>
-          </button>
-        ) : (
-          <button className='pb-10 pt-5' onClick={userSpeak}>
-            <span className='relative flex h-[60px] w-[60px]'>
-              <span className='absolute inline-flex h-full w-full rounded-full bg-gray-300'></span>
-              <span className='relative inline-flex rounded-full h-[60px] w-[60px] bg-[#fc4189] opacity-15 justify-center items-center'>
-                <FontAwesomeIcon icon={faMicrophone} style={{ color: 'white', fontSize: '25px' }}></FontAwesomeIcon>
-              </span>
-            </span>
-          </button>
-        )}
-
-        <button
-          className='cursor-pointer outline-none w-[145px] h-[60px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
-          onClick={endCall}
-        >
-          {t('call.hangUp')}
-        </button>
-      </React.Fragment>
-    )
-  }, [listening])
 
   return (
     <div className='flex lg:flex-row lg:items-center lg:justify-center xs:h-full flex-col items-center justify-end overflow-auto'>
-      <div className='bg-[url(../public/Bob.gif)] lg:h-[600px] lg:w-[600px] xs:h-0 w-full bg-no-repeat bg-contain bg-center'></div>
+      <div className='bg-[url(../public/Bob.gif)] lg:h-[500px] lg:w-[500px] xs:h-0 w-full bg-no-repeat bg-contain bg-center'></div>
       <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)] w-full xs:h-full'>
-        <div className='text-xl text-[#433136] font-bold pb-4'>
-          <FontAwesomeIcon
-            icon={faQuoteLeft}
-            style={{ color: 'black', fontSize: '35px', paddingRight: '12px' }}
-          ></FontAwesomeIcon>
-          {messages[messages.length - 1].message}
-        </div>
-        <div className='flex justify-center flex-col items-center absolute bottom-7 lg:relative lg:bottom-0'>
-          {!isCalling ? (
-            <button
-              className='cursor-pointer outline-none w-[145px] h-[60px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
-              onClick={userCall}
-            >
-              {t('call.call')}
-            </button>
-          ) : (
-            callingButtons
-          )}
-        </div>
-        <div className='flex mt-10 w-full overflow-x-auto'>
-          {converSationIdeas.map((idea) => (
-            <button
-              className='bg-[#fdcfe1] border-2 border-[#e64683cf] mr-3 px-3 py-1 last:mr-0 text-black rounded'
-              key={idea.key}
-              onClick={() => handleSend(idea.prompt)}
-            >
-              {idea.title}
-            </button>
-          ))}
-        </div>
+        <MessageBox message={messages[messages.length - 1].message} />
+        <TalkButton
+          userCall={userCall}
+          userSpeak={userSpeak}
+          userStopSpeaking={userStopSpeaking}
+          listening={listening}
+          isCalling={isCalling}
+          endCall={endCall}
+        />
+        <ConversionIdea onSelect={handleSend} />
       </div>
     </div>
   )
