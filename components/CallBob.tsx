@@ -102,7 +102,15 @@ export default function CallBob() {
       userSpeechSynthesis?.cancel()
       isChatbotSpeaking = false
     }
-    await getChatGptAnswer(updatedMessages)
+    const chatGPTAnswer = await getChatGptAnswer(updatedMessages)
+    setMessages([
+      ...updatedMessages,
+      {
+        message: chatGPTAnswer,
+        sender: 'ChatGPT',
+      },
+    ])
+    chatBotSpeak(chatGPTAnswer)
   }
 
   async function getChatGptAnswer(messagesWithSender: { message: string; sender: string }[]) {
@@ -131,14 +139,8 @@ export default function CallBob() {
       const data = await response.json()
 
       const { choices } = data
-      setMessages([
-        ...messagesWithSender,
-        {
-          message: choices[0].message.content,
-          sender: 'ChatGPT',
-        },
-      ])
-      chatBotSpeak(choices[0].message.content)
+
+      return choices[0].message.content
     } catch (error) {
       console.error('Error:', error)
     }
@@ -207,14 +209,16 @@ export default function CallBob() {
       <div className='bg-[url(../public/Bob.gif)] lg:h-[500px] lg:w-[500px] xs:h-0 w-full bg-no-repeat bg-contain bg-center'></div>
       <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)] w-full xs:h-full'>
         <MessageBox message={messages[messages.length - 1].message} />
-        <TalkButton
-          userCall={userCall}
-          userSpeak={userSpeak}
-          userStopSpeaking={userStopSpeaking}
-          listening={listening}
-          isCalling={isCalling}
-          endCall={endCall}
-        />
+        <div className='flex justify-center flex-col items-center absolute bottom-7 lg:relative lg:bottom-0'>
+          <TalkButton
+            userCall={userCall}
+            userSpeak={userSpeak}
+            userStopSpeaking={userStopSpeaking}
+            listening={listening}
+            isCalling={isCalling}
+            endCall={endCall}
+          />
+        </div>
         <ConversionIdea onSelect={handleSend} />
       </div>
     </div>

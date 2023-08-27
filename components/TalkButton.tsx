@@ -22,16 +22,18 @@ export default function TalkButton({
 }: TalkButtonProps) {
   const { t } = useTranslation()
 
-  const startConversationButton = (
-    <button
-      className='cursor-pointer outline-none w-[145px] h-[60px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
-      onClick={userCall}
-    >
-      {t('call.call')}
-    </button>
-  )
+  if (!isCalling) {
+    return (
+      <button
+        className='cursor-pointer outline-none w-[145px] h-[60px] md:text-lg text-white bg-[#ff3482] rounded-full border-none border-r-5 shadow'
+        onClick={userCall}
+      >
+        {t('call.call')}
+      </button>
+    )
+  }
 
-  const callingButtons = (
+  return (
     <React.Fragment>
       {listening ? (
         <button className='pb-10 pt-5' onClick={userStopSpeaking}>
@@ -60,11 +62,5 @@ export default function TalkButton({
         {t('call.hangUp')}
       </button>
     </React.Fragment>
-  )
-
-  return (
-    <div className='flex justify-center flex-col items-center absolute bottom-7 lg:relative lg:bottom-0'>
-      {!isCalling ? startConversationButton : callingButtons}
-    </div>
   )
 }
