@@ -58,7 +58,6 @@ export default function CallBob() {
     utterance.onstart = handleChatbotSpeechStart
     utterance.onend = handleChatbotSpeechEnd
     userSpeechSynthesis.speak(utterance)
-    console.log('chatbot speak')
   }
 
   const handleChatbotSpeechStart = () => {

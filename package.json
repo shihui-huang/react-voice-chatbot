@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest --watch"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
@@ -32,6 +33,12 @@
     "typescript": "5.1.6"
   },
   "devDependencies": {
-    "@types/react-speech-recognition": "^3.9.2"
+    "@testing-library/dom": "^9.3.1",
+    "@testing-library/jest-dom": "^6.1.2",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/react-speech-recognition": "^3.9.2",
+    "jest": "^29.6.4",
+    "jest-environment-jsdom": "^29.6.4"
   }
 }
