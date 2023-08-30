@@ -1,8 +1,7 @@
 import 'regenerator-runtime/runtime'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
-import { METHODS } from '@/constants'
 import { useTranslation } from 'next-i18next'
 import { useLanguage } from './LanguageContext'
 import ConversionIdea from './ConversionIdea'
@@ -11,6 +10,9 @@ import TalkButton from './TalkButton'
 import { getChatGptAnswer } from './callUtil'
 
 export default function CallBob() {
+  const isUserCalling = useRef(false)
+  const isChatbotSpeaking = useRef(false)
+
   const commands = [
     {
       command: ['*'],
@@ -18,7 +20,7 @@ export default function CallBob() {
     },
   ]
 
-  const [isCalling, setIsCalling] = useState(isUserCalling)
+  const [isCalling, setIsCalling] = useState(isUserCalling.current)
   const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
   const { t } = useTranslation()
   const [userSpeechSynthesis, setUserSpeechSynthesis] = useState<SpeechSynthesis>()
@@ -32,6 +34,7 @@ export default function CallBob() {
     },
   ]
   const [messages, setMessages] = useState(defaultMessage)
+
   useEffect(() => {
     setUserSpeechSynthesis(window.speechSynthesis)
     setUserLocalStorage(localStorage)
@@ -40,10 +43,10 @@ export default function CallBob() {
   // if selectedLanguage changes, reset call
   useEffect(() => {
     endCall()
-  }, [defaultIntroduction])
+  }, [defaultIntroduction, selectedLanguage])
 
   const chatBotSpeak = (message: string) => {
-    if (isChatbotSpeaking || !userSpeechSynthesis || !isUserCalling) {
+    if (isChatbotSpeaking.current || !userSpeechSynthesis || !isUserCalling.current) {
       return
     }
 
@@ -59,21 +62,15 @@ export default function CallBob() {
   }
 
   const handleChatbotSpeechStart = () => {
-    isChatbotSpeaking = true
+    isChatbotSpeaking.current = true
     SpeechRecognition.stopListening()
   }
 
   const handleChatbotSpeechEnd = () => {
-    console.log('end speak')
-    if (isUserCalling) {
-      console.log('start lisening')
+    if (isUserCalling.current) {
       SpeechRecognition.startListening({ language: selectedLanguage })
     }
-    isChatbotSpeaking = false
-  }
-  const systemMessageToSetChatGptBehaviour = {
-    role: 'system',
-    content: t('bob.systemMessage'),
+    isChatbotSpeaking.current = false
   }
 
   const handleSend = async (message: string) => {
@@ -91,13 +88,13 @@ export default function CallBob() {
     setMessages(updatedMessages)
 
     // Call from conversation ideas
-    if (!isUserCalling) {
-      isUserCalling = true
-      setIsCalling(isUserCalling)
+    if (!isUserCalling.current) {
+      isUserCalling.current = true
+      setIsCalling(isUserCalling.current)
     }
-    if (isChatbotSpeaking) {
+    if (isChatbotSpeaking.current) {
       userSpeechSynthesis?.cancel()
-      isChatbotSpeaking = false
+      isChatbotSpeaking.current = false
     }
     const chatGPTAnswer = await getChatGptAnswer(updatedMessages)
     setMessages([
@@ -122,8 +119,8 @@ export default function CallBob() {
   }
 
   const userCall = () => {
-    isUserCalling = true
-    setIsCalling(isUserCalling)
+    isUserCalling.current = true
+    setIsCalling(isUserCalling.current)
 
     if (!SpeechRecognition.browserSupportsSpeechRecognition()) {
       setMessages([
@@ -133,8 +130,8 @@ export default function CallBob() {
           sender: 'ChatGPT',
         },
       ])
-      isUserCalling = false
-      setIsCalling(isUserCalling)
+      isUserCalling.current = false
+      setIsCalling(isUserCalling.current)
       return
     }
 
@@ -157,15 +154,14 @@ export default function CallBob() {
   const endCall = () => {
     SpeechRecognition.stopListening()
     resetConversation()
-    isUserCalling = false
-    setIsCalling(isUserCalling)
-    if (isChatbotSpeaking) {
+    isUserCalling.current = false
+    setIsCalling(isUserCalling.current)
+    if (isChatbotSpeaking.current) {
       userSpeechSynthesis?.cancel()
-      isChatbotSpeaking = false
+      isChatbotSpeaking.current = false
     }
     SpeechRecognition.abortListening()
     userLocalStorage?.setItem('callHistory', JSON.stringify({ messages, date: new Date() }))
-    console.log(messages)
   }
 
   return (
