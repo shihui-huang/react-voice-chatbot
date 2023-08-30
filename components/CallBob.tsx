@@ -8,9 +8,7 @@ import { useLanguage } from './LanguageContext'
 import ConversionIdea from './ConversionIdea'
 import MessageBox from './MessageBox'
 import TalkButton from './TalkButton'
-
-let isUserCalling = false
-let isChatbotSpeaking = false
+import { getChatGptAnswer } from './callUtil'
 
 export default function CallBob() {
   const commands = [
@@ -110,39 +108,6 @@ export default function CallBob() {
       },
     ])
     chatBotSpeak(chatGPTAnswer)
-  }
-
-  async function getChatGptAnswer(messagesWithSender: { message: string; sender: string }[]) {
-    const chatGptApiFormattedMessages = messagesWithSender.map((messageObject) => {
-      return {
-        role: messageObject.sender === 'ChatGPT' ? 'assistant' : 'user',
-        content: messageObject.message,
-      }
-    })
-
-    const chatGptApiMessages = [
-      systemMessageToSetChatGptBehaviour, // The system message DEFINES the logic of our chatGPT
-      ...chatGptApiFormattedMessages, // The messages from our chat with ChatGPT
-    ]
-
-    try {
-      const response = await fetch(`/api/chat/message`, {
-        method: METHODS.POST,
-        body: JSON.stringify(chatGptApiMessages),
-      })
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-
-      const data = await response.json()
-
-      const { choices } = data
-
-      return choices[0].message.content
-    } catch (error) {
-      console.error('Error:', error)
-    }
   }
 
   const userSpeak = () => {
