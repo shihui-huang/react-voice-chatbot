@@ -8,7 +8,12 @@ import ConversionIdea from './ConversionIdea'
 import MessageBox from './MessageBox'
 import TalkButton from './TalkButton'
 import { getChatGptAnswer } from './callUtil'
+import { CallHistoryType } from './CallHistory'
 
+export interface MessageType {
+  message: string
+  sender: string
+}
 export default function CallBob() {
   const isUserCalling = useRef(false)
   const isChatbotSpeaking = useRef(false)
@@ -33,7 +38,7 @@ export default function CallBob() {
       sender: 'ChatGPT',
     },
   ]
-  const [messages, setMessages] = useState(defaultMessage)
+  const [messages, setMessages] = useState<MessageType[]>(defaultMessage)
 
   useEffect(() => {
     setUserSpeechSynthesis(window.speechSynthesis)
@@ -151,7 +156,17 @@ export default function CallBob() {
     setMessages(defaultMessage)
   }
 
-  const endCall = () => {
+  const updateCallHistory = () => {
+    if (userLocalStorage && messages.length > 1) {
+      const storage = userLocalStorage.getItem('callHistory')
+        ? JSON.parse(userLocalStorage.getItem('callHistory') as string)
+        : []
+      const newCallHistory: CallHistoryType[] = [...storage, { messages, date: new Date() }]
+      userLocalStorage?.setItem('callHistory', JSON.stringify(newCallHistory))
+    }
+  }
+
+  const hangUp = () => {
     SpeechRecognition.stopListening()
     resetConversation()
     isUserCalling.current = false
@@ -161,7 +176,11 @@ export default function CallBob() {
       isChatbotSpeaking.current = false
     }
     SpeechRecognition.abortListening()
-    userLocalStorage?.setItem('callHistory', JSON.stringify({ messages, date: new Date() }))
+  }
+
+  const endCall = () => {
+    hangUp()
+    updateCallHistory()
   }
 
   return (

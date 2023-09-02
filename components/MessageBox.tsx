@@ -6,7 +6,7 @@ interface MessageBoxProps {
 }
 export default function MessageBox({ message }: MessageBoxProps) {
   return (
-    <div className='text-xl text-[#433136] font-bold pb-4'>
+    <div className='text-xl text-[#22223B] font-bold pb-4'>
       <FontAwesomeIcon
         icon={faQuoteLeft}
         style={{ color: 'black', fontSize: '35px', paddingRight: '12px' }}
