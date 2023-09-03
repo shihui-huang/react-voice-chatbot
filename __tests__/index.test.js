@@ -254,13 +254,14 @@ describe('Call bob', () => {
     const user = userEvent.setup()
     render(<Home />)
 
-    const callHistoryButton = screen.getByRole('button', { name: 'call.history' })
+    const callHistoryButton = screen.getByRole('button', { name: 'callHistory' })
     expect(callHistoryButton).toBeVisible()
     user.click(callHistoryButton)
 
-    const historyModalTitle = await screen.findByText('call.history.modal.title')
+    const noHistoryMessage = await screen.findByText('callHistory.modal.noHistoryMessage')
     expect(screen.queryByText('2023-09-03T08:40:00.000Z')).not.toBeInTheDocument()
     expect(screen.queryByText('bob.firstMessage')).not.toBeInTheDocument()
+    expect(noHistoryMessage).toBeInTheDocument()
     const historyModalCloseButton = await screen.findByTestId('history-modal-close-button-true')
     user.click(historyModalCloseButton)
 
@@ -279,5 +280,6 @@ describe('Call bob', () => {
     await user.click(callHistoryButton)
     await waitFor(() => expect(screen.getByText('2023-09-03T08:40:00.000Z')).toBeInTheDocument())
     await waitFor(() => expect(screen.getByText('bob.firstMessage')).toBeVisible())
+    expect(noHistoryMessage).not.toBeInTheDocument()
   })
 })

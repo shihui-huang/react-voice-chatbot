@@ -6,7 +6,7 @@ import type { MenuProps } from 'antd'
 import { Layout, Menu } from 'antd'
 import { MessageType } from './CallBob'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClose, faRobot, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faAngleLeft, faClose, faRobot, faUser } from '@fortawesome/free-solid-svg-icons'
 import styled from 'styled-components'
 
 const { Sider } = Layout
@@ -26,7 +26,12 @@ const StyledModal = styled(Modal)`
     height: 56px;
     margin: 0;
     display: flex;
-    justify-content: center;
+    @media (mix-width: 640px) {
+      justify-content: center;
+    }
+  }
+  .ant-modal-title {
+    width: 100%;
   }
   .ant-modal-body {
     height: calc(100% - 56px);
@@ -46,17 +51,28 @@ export function CallHistory() {
   const { t } = useTranslation()
   const [callHistories, setCallHistories] = useState<CallHistoryType[]>([])
   const [selectedKey, setSelectedKey] = useState('')
+  const [showHistoryLayout, setShowHistoryLayout] = useState(false) // to manage sider and history layout visibility on small screens
 
   useEffect(() => {
     const useCallHistories: CallHistoryType[] = localStorage.getItem('callHistory')
       ? JSON.parse(localStorage.getItem('callHistory') as string)
       : []
     setCallHistories(useCallHistories)
+    setShowHistoryLayout(false)
   }, [open])
 
   useEffect(() => {
     setSelectedKey(callHistories[callHistories.length - 1]?.date)
   }, [callHistories])
+
+  const handleSidebarClick = (key: string) => {
+    setSelectedKey(key)
+    setShowHistoryLayout(true)
+  }
+
+  const handleBackClick = () => {
+    setShowHistoryLayout(false)
+  }
 
   const items: MenuProps['items'] = callHistories.map((history) => ({
     key: history.date,
@@ -65,36 +81,60 @@ export function CallHistory() {
 
   const modalCloseButton = (
     <div data-testid={`history-modal-close-button-${open}`}>
-      <FontAwesomeIcon icon={faClose} style={{ fontSize: '18px' }}></FontAwesomeIcon>
+      <FontAwesomeIcon icon={faClose} style={{ fontSize: '18px', color: 'black' }}></FontAwesomeIcon>
     </div>
+  )
+
+  const noHistoryDom = (
+    <div className='h-full flex justify-center items-center '>{t('callHistory.modal.noHistoryMessage')}</div>
   )
   return (
     <>
       <Button type='link' className='text-black hover:!text-black' onClick={() => setOpen(true)}>
-        {t('call.history')}
+        {t('callHistory')}
       </Button>
       <StyledModal
-        title={t('call.history.modal.title')}
+        title={
+          showHistoryLayout ? (
+            <div className='flex w-full'>
+              <div className='flex-1 md:opacity-0'>
+                <FontAwesomeIcon
+                  icon={faAngleLeft}
+                  style={{ fontSize: '18px' }}
+                  onClick={handleBackClick}
+                ></FontAwesomeIcon>
+              </div>
+              <div className='flex-1 flex justify-center'>{t('callHistory.modal.title')}</div>
+              <div className='flex-1'>{''}</div>
+            </div>
+          ) : (
+            <div className='justify-center flex'>{t('callHistory.modal.title')}</div>
+          )
+        }
         centered
         open={open}
         onOk={() => setOpen(false)}
         onCancel={() => setOpen(false)}
-        className='rounded-lg xs:!w-full lg:!w-[calc(100%-100px)] overflow-y-auto'
+        className='rounded-lg xxs:!w-full xxs:max-w-none md:!w-[calc(100%-100px)] overflow-y-auto'
         footer={null}
         closeIcon={modalCloseButton}
       >
-        <Layout hasSider className='flex rounded-lg'>
-          <Sider className=' !bg-gray-900 shadow-inner'>
+        <Layout hasSider className={`flex rounded-lg`}>
+          <Sider
+            className={`!bg-gray-900 md:block md:!grow-0 md:!shrink-0 md:!basis-[200px] md:max-w-[200px] md:w-[200px] ${
+              showHistoryLayout ? 'xxs:hidden' : 'xxs:block xxs:!w-full xxs:!max-w-none xxs:!flex-initial'
+            }`}
+          >
             <Menu
               items={items}
-              onClick={(item) => setSelectedKey(item.key)}
+              onClick={(item) => handleSidebarClick(item.key)}
               selectedKeys={[selectedKey]}
               className='!bg-gray-900  text-white'
               itemProp=''
             />
           </Sider>
-          <Layout className='w-full overflow-y-auto'>
-            <div className='bg-white '>
+          <Layout className={`w-full md:block ${showHistoryLayout ? 'xxs:block' : 'xxs:hidden'}`}>
+            <div className='bg-white md:h-full overflow-y-auto'>
               {selectedKey && callHistories.length > 0
                 ? callHistories
                     .find((history) => history.date === selectedKey)
@@ -129,7 +169,7 @@ export function CallHistory() {
                         </div>
                       </div>
                     ))
-                : null}
+                : noHistoryDom}
             </div>
           </Layout>
         </Layout>
