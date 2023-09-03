@@ -6,7 +6,7 @@ import type { MenuProps } from 'antd'
 import { Layout, Menu } from 'antd'
 import { MessageType } from './CallBob'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRobot, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faClose, faRobot, faUser } from '@fortawesome/free-solid-svg-icons'
 import styled from 'styled-components'
 
 const { Sider } = Layout
@@ -55,27 +55,33 @@ export function CallHistory() {
   }, [open])
 
   useEffect(() => {
-    setSelectedKey(callHistories[0]?.date)
-  }, [])
+    setSelectedKey(callHistories[callHistories.length - 1]?.date)
+  }, [callHistories])
 
   const items: MenuProps['items'] = callHistories.map((history) => ({
     key: history.date,
     label: history.date,
   }))
 
+  const modalCloseButton = (
+    <div data-testid={`history-modal-close-button-${open}`}>
+      <FontAwesomeIcon icon={faClose} style={{ fontSize: '18px' }}></FontAwesomeIcon>
+    </div>
+  )
   return (
     <>
       <Button type='link' className='text-black hover:!text-black' onClick={() => setOpen(true)}>
         {t('call.history')}
       </Button>
       <StyledModal
-        title={t('call.history')}
+        title={t('call.history.modal.title')}
         centered
         open={open}
         onOk={() => setOpen(false)}
         onCancel={() => setOpen(false)}
         className='rounded-lg xs:!w-full lg:!w-[calc(100%-100px)] overflow-y-auto'
         footer={null}
+        closeIcon={modalCloseButton}
       >
         <Layout hasSider className='flex rounded-lg'>
           <Sider className=' !bg-gray-900 shadow-inner'>

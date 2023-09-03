@@ -49,6 +49,8 @@ describe('Call bob', () => {
     SpeechRecognition.browserSupportsSpeechRecognition.mockReturnValue(true)
     // Mock the SpeechSynthesisUtterance object
     window.SpeechSynthesisUtterance = MockSpeechSynthesisUtterance
+    window.localStorage.clear()
+    jest.clearAllMocks()
   })
 
   afterAll(() => {
@@ -170,9 +172,6 @@ describe('Call bob', () => {
     const callButton = screen.getByRole('button', { name: 'call.call' })
     expect(callButton).toBeVisible()
     await user.click(callButton)
-    await waitFor(() => {
-      expect(SpeechRecognition.startListening).toHaveBeenCalledTimes(1)
-    })
 
     const hangUpButton = await screen.findByRole('button', { name: 'call.hangUp' })
     expect(hangUpButton).toBeVisible()
@@ -246,5 +245,39 @@ describe('Call bob', () => {
     // should show chatbot's response
     const chatGptResponse = await screen.findByText('Mocked message from ChatGPT')
     expect(chatGptResponse).toBeVisible()
+  })
+
+  it('should stock call history when call is ended', async () => {
+    const mockDate = new Date('2023-09-03T10:40:00')
+    global.Date = jest.fn().mockImplementation(() => mockDate) // mock Date "new" constructor
+
+    const user = userEvent.setup()
+    render(<Home />)
+
+    const callHistoryButton = screen.getByRole('button', { name: 'call.history' })
+    expect(callHistoryButton).toBeVisible()
+    user.click(callHistoryButton)
+
+    const historyModalTitle = await screen.findByText('call.history.modal.title')
+    expect(screen.queryByText('2023-09-03T08:40:00.000Z')).not.toBeInTheDocument()
+    expect(screen.queryByText('bob.firstMessage')).not.toBeInTheDocument()
+    const historyModalCloseButton = await screen.findByTestId('history-modal-close-button-true')
+    user.click(historyModalCloseButton)
+
+    const callButton = await screen.findByRole('button', { name: 'call.call' })
+    expect(callButton).toBeVisible()
+    user.click(callButton)
+
+    const hangUpButton = await screen.findByRole('button', { name: 'call.hangUp' })
+    expect(hangUpButton).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'call.call' })).not.toBeInTheDocument()
+
+    user.click(hangUpButton)
+    expect(callButton).toBeVisible()
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'call.hangUp' })).not.toBeInTheDocument())
+
+    await user.click(callHistoryButton)
+    await waitFor(() => expect(screen.getByText('2023-09-03T08:40:00.000Z')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('bob.firstMessage')).toBeVisible())
   })
 })

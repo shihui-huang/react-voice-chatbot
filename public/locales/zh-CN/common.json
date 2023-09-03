@@ -5,6 +5,8 @@
   "bob.firstMessage": "你好！最近怎么样？",
   "call.call": "打给鲍勃 📞",
   "call.hangUp": "挂断电话",
+  "call.history": "聊天记录",
+  "call.history.modal.title": "聊天记录",
   "conversation.idea": "聊天话题建议",
   "conversation.fitnessCoach.title": "健身教练",
   "conversation.fitnessCoach.prompt": "我希望你能充当我的私人健身教练。你可以根据我的要求：为我制定锻炼计划、协助练习、解释健身的重要性，回答健身方面的问题。你还可以询问我的健身目标和我想要锻炼的部位。",
