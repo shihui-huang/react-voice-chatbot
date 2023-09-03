@@ -3,7 +3,7 @@ import 'regenerator-runtime/runtime'
 import React, { useEffect, useRef, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import { useTranslation } from 'next-i18next'
-import { useLanguage } from './LanguageContext'
+import { useLanguage } from './LanguageManager'
 import ConversionIdea from './ConversionIdea'
 import MessageBox from './MessageBox'
 import TalkButton from './TalkButton'
@@ -188,16 +188,14 @@ export default function CallBob() {
       <div className='bg-[url(../public/assets/Bob.gif)] lg:h-[500px] lg:w-[500px] xs:h-0 w-full bg-no-repeat bg-contain bg-center'></div>
       <div className='flex justify-center flex-col items-center lg:w-[calc(100%-600px)] w-full xs:h-full'>
         <MessageBox message={messages[messages.length - 1].message} />
-        <div className='flex justify-center flex-col items-center absolute bottom-7 lg:relative lg:bottom-0'>
-          <TalkButton
-            userCall={userCall}
-            userSpeak={userSpeak}
-            userStopSpeaking={userStopSpeaking}
-            listening={listening}
-            isCalling={isCalling}
-            endCall={endCall}
-          />
-        </div>
+        <TalkButton
+          userCall={userCall}
+          userSpeak={userSpeak}
+          userStopSpeaking={userStopSpeaking}
+          listening={listening}
+          isCalling={isCalling}
+          endCall={endCall}
+        />
         <ConversionIdea onSelect={handleSend} />
       </div>
     </div>

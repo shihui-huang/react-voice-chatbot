@@ -8,7 +8,7 @@ type LanguageContextType = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-type LanguageProviderProps = {
+type LanguageManagerProps = {
   children: React.ReactNode
 }
 
@@ -18,7 +18,7 @@ export const languageOptions: Record<string, string> = {
   'zh-CN': '中文',
 }
 
-const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+const LanguageManager: React.FC<LanguageManagerProps> = ({ children }) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en-US') // Default language
 
   useEffect(() => {
@@ -37,9 +37,9 @@ const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
 export const useLanguage = () => {
   const context = useContext(LanguageContext)
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
+    throw new Error('useLanguage must be used within a LanguageManager')
   }
   return context
 }
 
-export default LanguageProvider
+export default LanguageManager

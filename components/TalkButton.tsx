@@ -34,7 +34,7 @@ export default function TalkButton({
   }
 
   return (
-    <React.Fragment>
+    <div className='flex justify-center flex-col items-center absolute bottom-7 lg:relative lg:bottom-0'>
       {listening ? (
         <button className='pb-10 pt-5' onClick={userStopSpeaking}>
           <span className='relative flex h-[60px] w-[60px]'>
@@ -61,6 +61,6 @@ export default function TalkButton({
       >
         {t('call.hangUp')}
       </button>
-    </React.Fragment>
+    </div>
   )
 }

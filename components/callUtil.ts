@@ -1,8 +1,8 @@
 import { METHODS } from '@/constants'
-import { i18n } from 'next-i18next' // Import
+import { i18n } from 'next-i18next'
 
 export async function getChatGptAnswer(messagesWithSender: { message: string; sender: string }[]) {
-  i18n?.init() // Initialize i18n
+  i18n?.init()
 
   const chatGptApiFormattedMessages = messagesWithSender.map((messageObject) => {
     return {
