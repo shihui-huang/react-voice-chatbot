@@ -1,5 +1,5 @@
 import { useTranslation } from 'next-i18next'
-import { languageOptions, useLanguage } from './LanguageContext'
+import { languageOptions, useLanguage } from './LanguageManager'
 
 interface ConversionIdeaProps {
   onSelect: (prompt: string) => void
@@ -31,7 +31,7 @@ export default function ConversionIdea({ onSelect }: ConversionIdeaProps) {
   ]
 
   return (
-    <div className='flex mt-10 w-full overflow-x-auto justify-center'>
+    <div className='mt-10 w-full overflow-x-auto justify-center xxs:hidden md:flex'>
       {converSationIdeas.map((idea) => (
         <button
           className='bg-[#fdcfe1] border-2 border-[#e64683cf] mr-3 px-3 py-1 last:mr-0 text-black rounded'
