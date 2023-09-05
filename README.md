@@ -1,38 +1,96 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# 🤖 Call Bob
 
-First, run the development server:
+Inspired by [CallAnnie](https://callannie.ai/call),
+"Call Bob" is a React application that integrates with an OpenAI API and leverages the Web Speech API for voice recognition and speech synthesis.   
+It provides an interactive and immersive calling conversational experience through voice.   
+Users can initiate a conversation, speak commands, or ask questions in multiple languages.
+
+## 🌟 Features
+
+- **Voice Recognition**: Utilizes Web Speech API to recognize spoken commands.
+  
+- **Text-to-Speech**: Read the chatbot responses aloud.
+
+- **Multi-language Support**: Uses the `next-i18next` package for i18n and allows conversation in multiple languages.
+
+- **Interactive UI**: Easy-to-use interface with buttons to initiate and end calls.
+
+- **Mobile Support**: Offers a mobile-friendly responsive interface.
+
+- **Conversation History**: Stores previous conversations locally.
+
+## ✨ Demo
+### Basic calling functionality
+
+
+https://github.com/shihui-huang/react-voice-chatbot/assets/52117621/f3faa11a-aeae-4b0a-82cd-864e42950383
+
+
+
+### Calling history & Responsiveness
+
+
+
+https://github.com/shihui-huang/react-voice-chatbot/assets/52117621/0abfbab5-143b-4346-b50f-0bb28a50cf95
+
+
+
+
+
+
+## 🛠️ Tech Stack 
+
+- **Frontend Framework**: [Next.js](https://nextjs.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Conversational Engine**: [OpenAI API](https://openai.com/)
+- **Speech Recognition**: [react-speech-recognition](https://www.npmjs.com/package/react-speech-recognition)
+- **Speech Synthesis**: [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
+- **UI Library**: [AntDesign](https://ant.design/)
+- **Styling**: [styled-components](https://styled-components.com/) & [Tailwind CSS](https://tailwindcss.com/) & [FontAswsome](https://fontawesome.com/)
+- **Localization**: [i18next](https://www.i18next.com/)
+- **Testing**: [Jest](https://jestjs.io/) and [Testing Library](https://testing-library.com/)
+
+## 🧩 Components Overview
+
+### `CallManager`
+
+- Manages the call state, voice recognition, and conversation flow.
+  
+### `MessageBox`
+
+- Displays the current chat messages with styling.
+
+### `TalkButton`
+
+- Provides buttons to start, end, and manage the speech-to-text operation.
+
+### `CallHistory`
+
+- Manages and displays the call history in a modal dialog. It fetches the call history from the local storage and allows users to review past conversations by date.
+
+### `ConversionIdea`
+
+- Displays conversation starter ideas in a horizontal layout. These are predefined scenarios or topics that help users initiate meaningful conversations with the chatbot.
+
+### `ConversationIdeasModal`
+
+- A mobile-only Drawer UI for quick conversation starters.
+
+## ⌨️ Development 
+
+clone locally:
+```
+$ git clone git@github.com:shihui-huang/call-bob.git
+```
+
+Then, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+$ cd call-bob/
+$ npm install
+$ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
