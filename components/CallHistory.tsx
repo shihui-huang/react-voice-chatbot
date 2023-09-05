@@ -4,10 +4,10 @@ import { useTranslation } from 'next-i18next'
 
 import type { MenuProps } from 'antd'
 import { Layout, Menu } from 'antd'
-import { MessageType } from './CallBob'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAngleLeft, faClose, faRobot, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faAngleLeft, faClose, faPhone, faRobot, faUser } from '@fortawesome/free-solid-svg-icons'
 import styled from 'styled-components'
+import { MessageType } from './CallManager'
 
 const { Sider } = Layout
 
@@ -90,8 +90,11 @@ export function CallHistory() {
   )
   return (
     <>
-      <Button type='link' className='text-black hover:!text-black' onClick={() => setOpen(true)}>
-        {t('callHistory')}
+      <Button type='link' className='text-black hover:!text-black mr-3' onClick={() => setOpen(true)}>
+        <div className='xxs:hidden md:block'>{t('callHistory')}</div>
+        <div className='xxs:block md:hidden'>
+          <FontAwesomeIcon icon={faPhone} style={{ fontSize: '18px' }}></FontAwesomeIcon>
+        </div>
       </Button>
       <StyledModal
         title={
