@@ -31,7 +31,7 @@ export default function ConversionIdea({ onSelect }: ConversionIdeaProps) {
   ]
 
   return (
-    <div className='mt-10 w-full overflow-x-auto justify-center xxs:hidden md:flex'>
+    <div className='xxs:mt-10 md:mt-0 w-full overflow-x-auto justify-center xxs:hidden md:flex'>
       {converSationIdeas.map((idea) => (
         <button
           className='bg-[#fdcfe1] border-2 border-[#e64683cf] mr-3 px-3 py-1 last:mr-0 text-black rounded'
