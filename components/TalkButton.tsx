@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
-import { faMicrophone, faSquare } from '@fortawesome/free-solid-svg-icons'
+import { faMicrophone, faMicrophoneSlash, faSquare } from '@fortawesome/free-solid-svg-icons'
 import { useTranslation } from 'next-i18next'
 
 interface TalkButtonProps {
@@ -10,6 +10,7 @@ interface TalkButtonProps {
   listening: boolean
   isCalling: boolean
   endCall: () => void
+  isChatbotSpeaking: boolean
 }
 
 export default function TalkButton({
@@ -19,9 +20,9 @@ export default function TalkButton({
   listening,
   isCalling,
   endCall,
+  isChatbotSpeaking,
 }: TalkButtonProps) {
   const { t } = useTranslation()
-
   if (!isCalling) {
     return (
       <button
@@ -45,11 +46,18 @@ export default function TalkButton({
           </span>
         </button>
       ) : (
-        <button className='py-4' onClick={userSpeak}>
+        <button className={`py-4 ${isChatbotSpeaking ? 'pointer-events-none' : ''}`} onClick={userSpeak}>
           <span className='relative flex h-[50px] w-[50px]'>
             <span className='absolute inline-flex h-full w-full rounded-full bg-gray-300'></span>
-            <span className='relative inline-flex rounded-full h-[50px] w-[50px] bg-[#fc4189] opacity-15 justify-center items-center'>
-              <FontAwesomeIcon icon={faMicrophone} style={{ color: 'white', fontSize: '20px' }}></FontAwesomeIcon>
+            <span
+              className={`relative inline-flex rounded-full h-[50px] w-[50px] opacity-15 justify-center items-center ${
+                isChatbotSpeaking ? 'bg-gray-400' : 'bg-[#fc4189]'
+              }`}
+            >
+              <FontAwesomeIcon
+                icon={isChatbotSpeaking ? faMicrophoneSlash : faMicrophone}
+                style={{ color: 'white', fontSize: '20px' }}
+              ></FontAwesomeIcon>
             </span>
           </span>
         </button>

@@ -44,6 +44,9 @@ const StyledModal = styled(Modal)`
     background: rgba(52, 53, 65);
     color: white !important;
   }
+  .ant-layout-sider-children {
+    overflow-y: auto;
+  }
 `
 
 export function CallHistory() {

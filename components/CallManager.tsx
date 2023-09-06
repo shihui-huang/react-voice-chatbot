@@ -21,6 +21,7 @@ interface CallContextType {
   endCall: () => void
   handleSend: (message: string) => void
   messages: MessageType[]
+  isChatbotSpeaking: boolean
 }
 
 const CallContext = createContext<CallContextType | undefined>(undefined)
@@ -40,6 +41,7 @@ const CallManager: React.FC<CallManagerProps> = ({ children }) => {
     },
   ]
 
+  const [isBobSpeaking, setIsBobSpeaking] = useState(isChatbotSpeaking.current)
   const [isCalling, setIsCalling] = useState(isUserCalling.current)
   const { transcript, resetTranscript, listening } = useSpeechRecognition({ commands })
   const { t } = useTranslation()
@@ -83,6 +85,7 @@ const CallManager: React.FC<CallManagerProps> = ({ children }) => {
 
   const handleChatbotSpeechStart = () => {
     isChatbotSpeaking.current = true
+    setIsBobSpeaking(true)
     SpeechRecognition.stopListening()
   }
 
@@ -91,6 +94,7 @@ const CallManager: React.FC<CallManagerProps> = ({ children }) => {
       SpeechRecognition.startListening({ language: selectedLanguage })
     }
     isChatbotSpeaking.current = false
+    setIsBobSpeaking(false)
   }
 
   const handleSend = async (message: string) => {
@@ -115,6 +119,7 @@ const CallManager: React.FC<CallManagerProps> = ({ children }) => {
     if (isChatbotSpeaking.current) {
       userSpeechSynthesis?.cancel()
       isChatbotSpeaking.current = false
+      setIsBobSpeaking(false)
     }
     const chatGPTAnswer = await getChatGptAnswer(updatedMessages)
     setMessages([
@@ -189,6 +194,7 @@ const CallManager: React.FC<CallManagerProps> = ({ children }) => {
     if (isChatbotSpeaking.current) {
       userSpeechSynthesis?.cancel()
       isChatbotSpeaking.current = false
+      setIsBobSpeaking(false)
     }
     SpeechRecognition.abortListening()
   }
@@ -200,7 +206,17 @@ const CallManager: React.FC<CallManagerProps> = ({ children }) => {
 
   return (
     <CallContext.Provider
-      value={{ userCall, userSpeak, userStopSpeaking, listening, isCalling, endCall, handleSend, messages }}
+      value={{
+        userCall,
+        userSpeak,
+        userStopSpeaking,
+        listening,
+        isCalling,
+        endCall,
+        handleSend,
+        messages,
+        isChatbotSpeaking: isBobSpeaking,
+      }}
     >
       {children}
     </CallContext.Provider>
