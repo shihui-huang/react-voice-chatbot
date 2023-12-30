@@ -1,15 +1,13 @@
-
 # 🤖 Call Bob
 
 Inspired by [CallAnnie](https://callannie.ai/call),
-"Call Bob" is a React application that integrates with an OpenAI API and leverages the Web Speech API for voice recognition and speech synthesis.   
-It provides an interactive and immersive calling conversational experience through voice.   
+"Call Bob" is a React application that integrates with an OpenAI API and leverages the Web Speech API for voice recognition and speech synthesis.  
+It provides an interactive and immersive calling conversational experience through voice.  
 Users can initiate a conversation, speak commands, or ask questions in multiple languages.
 
 ## 🌟 Features
 
 - **Voice Recognition**: Utilizes Web Speech API to recognize spoken commands.
-  
 - **Text-to-Speech**: Read the chatbot responses aloud.
 
 - **Multi-language Support**: Uses the `next-i18next` package for i18n and allows conversation in multiple languages.
@@ -21,25 +19,16 @@ Users can initiate a conversation, speak commands, or ask questions in multiple 
 - **Conversation History**: Stores previous conversations locally.
 
 ## ✨ Demo
-### Basic calling functionality
 
+### Basic calling functionality
 
 https://github.com/shihui-huang/react-voice-chatbot/assets/52117621/f3faa11a-aeae-4b0a-82cd-864e42950383
 
-
-
 ### Calling history & Responsiveness
-
-
 
 https://github.com/shihui-huang/react-voice-chatbot/assets/52117621/0abfbab5-143b-4346-b50f-0bb28a50cf95
 
-
-
-
-
-
-## 🛠️ Tech Stack 
+## 🛠️ Tech Stack
 
 - **Frontend Framework**: [Next.js](https://nextjs.org/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -56,7 +45,7 @@ https://github.com/shihui-huang/react-voice-chatbot/assets/52117621/0abfbab5-143
 ### `CallManager`
 
 - Manages the call state, voice recognition, and conversation flow.
-  
+
 ### `MessageBox`
 
 - Displays the current chat messages with styling.
@@ -77,9 +66,10 @@ https://github.com/shihui-huang/react-voice-chatbot/assets/52117621/0abfbab5-143
 
 - A mobile-only Drawer UI for quick conversation starters.
 
-## ⌨️ Development 
+## ⌨️ Development
 
 clone locally:
+
 ```
 $ git clone git@github.com:shihui-huang/call-bob.git
 ```
@@ -93,4 +83,3 @@ $ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-

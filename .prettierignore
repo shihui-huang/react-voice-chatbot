@@ -1,0 +1,13 @@
+# Ignore artifacts:
+*.snap 
+/build
+/public/
+/coverage
+/terraform
+/resources
+/src/index.css
+/package-lock.json
+/yarn.lock
+/yarn-error.log
+*.md
+*.yml
